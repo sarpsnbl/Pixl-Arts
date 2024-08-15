@@ -1,0 +1,178 @@
+﻿@using Newtonsoft.Json
+@model PixlArts.Models.Art
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<head>
+    <style>
+        .box {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+
+<h1>Edit</h1>
+
+<h4>Art</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form id="artForm" asp-action="Edit">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="pixels" class="control-label">Pixel Art</label>
+                <div id="brushColor" style="width: 50px; height: 50px; border: 1px solid #000; background-color: #ffffff; margin-bottom: 10px;"></div>
+                <input type="color" id="colorPicker" value="#ffffff" style="margin-bottom: 10px;" onchange="pickColor(this.value)">
+                <button type="button" onclick="clearGrid()" style="margin-bottom: 10px;">Clear</button>
+                <div class="color-palette" style="margin-bottom: 10px;">
+                    <div class="recent-colors" id="recentColors" style="display: flex; gap: 5px;">
+                        <!-- Recently used colors will be added here dynamically -->
+                    </div>
+                </div>
+                <div class="grid" id="grid" style="display: grid; grid-template-columns: repeat(5, 50px); grid-template-rows: repeat(5, 50px);">
+                    @{
+                        var pixelData = Model.Pixels;
+                        var pixels = new List<string>();
+
+                        if (pixelData != null && pixelData.Length > 0)
+                        {
+                            try
+                            {
+                                pixels = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(pixelData[0]);
+                            }
+                            catch
+                            {
+                                <p>Error: Unable to parse pixel data.</p>
+                            }
+                        }
+
+                            // Print the pixels to the console for debugging
+                        <script>
+                            console.log("Pixel Data for Art ID @Model.Id:", @Html.Raw(JsonConvert.SerializeObject(pixels)));
+                        </script>
+
+                        // Render the grid with pixel data
+                        if (pixels != null && pixels.Count == 25)
+                        {
+                            for (int i = 0; i < pixels.Count; i++)
+                            {
+                                var color = pixels[i];
+                                <div class="box" style="background-color: @color;"></div>
+                            }
+                        }
+                        else
+                        {
+                            <p>Error: Pixel data is invalid or empty.</p>
+                        }
+                    }
+                </div>
+                <input type="hidden" id="Pixels" name="Pixels" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        let currentColor = '#ffffff'; // Default color
+        let recentColors = [];
+
+        function pickColor(color) {
+            currentColor = color;
+            document.getElementById('brushColor').style.backgroundColor = color;
+            updateRecentColors(color);
+        }
+
+        function paintBox(box) {
+            box.style.backgroundColor = currentColor;
+        }
+
+        function clearGrid() {
+            const boxes = document.querySelectorAll('.box');
+            boxes.forEach(box => {
+                box.style.backgroundColor = '#ffffff';
+            });
+        }
+
+        function saveColors() {
+            const boxes = document.querySelectorAll('.box');
+            let colorData = [];
+            boxes.forEach(box => {
+                const color = box.style.backgroundColor || '#ffffff';
+                const hexColor = rgbToHex(color);
+                colorData.push(hexColor);
+            });
+
+            // Save the colorData as a string
+            const colorString = JSON.stringify(colorData);
+            document.getElementById('Pixels').value = colorString;
+        }
+
+        function rgbToHex(rgb) {
+            let rgbArray = rgb.match(/\d+/g);
+            if (rgbArray) {
+                let r = parseInt(rgbArray[0]);
+                let g = parseInt(rgbArray[1]);
+                let b = parseInt(rgbArray[2]);
+                return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+            }
+            return rgb; // Fallback if RGB parsing fails
+        }
+
+        function updateRecentColors(color) {
+            if (!recentColors.includes(color)) {
+                recentColors.unshift(color);
+                if (recentColors.length > 3) {
+                    recentColors.pop();
+                }
+            }
+            renderRecentColors();
+        }
+
+        function renderRecentColors() {
+            const recentColorsDiv = document.getElementById('recentColors');
+            recentColorsDiv.innerHTML = '';
+            recentColors.forEach(color => {
+                const colorDiv = document.createElement('div');
+                colorDiv.style.backgroundColor = color;
+                colorDiv.style.width = '30px';
+                colorDiv.style.height = '30px';
+                colorDiv.style.border = '1px solid #000';
+                colorDiv.style.display = 'inline-block';
+                colorDiv.style.cursor = 'pointer';
+                colorDiv.onclick = () => pickColor(color);
+                recentColorsDiv.appendChild(colorDiv);
+            });
+        }
+
+        // Ensure colors are saved before form submission
+        document.getElementById('artForm').addEventListener('submit', saveColors);
+
+        // Add click event listeners to the boxes after the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.box').forEach(box => {
+                box.addEventListener('click', () => paintBox(box));
+            });
+        });
+    </script>
+}

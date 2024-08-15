@@ -1,0 +1,248 @@
+﻿@model PixlArts.Models.Art
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<head>
+    <style>
+        body {
+            background-color: #2F2F2F; /* Darker background color */
+            font-family: 'Arial', sans-serif;
+            color: #eaeaea;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #fff;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+            .form-group label {
+                display: block;
+                font-weight: 600;
+                margin-bottom: 5px;
+                color: #fff;
+            }
+
+            .form-group input[type="text"] {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #444;
+                border-radius: 4px;
+                background-color: #222;
+                color: #fff;
+            }
+
+            .form-group input[type="color"] {
+                border: none;
+                padding: 0;
+            }
+
+        .color-palette {
+            margin-bottom: 10px;
+        }
+
+        .recent-colors {
+            display: flex;
+            gap: 5px;
+        }
+
+        .box {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #333;
+            cursor: pointer;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 50px);
+            grid-template-rows: repeat(5, 50px);
+            gap: 0; /* Remove space between boxes */
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+            padding: 10px 20px;
+            text-align: center;
+            background-color: #66c2ff;
+            color: #1b1b1b;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                background-color: #1b1b1b;
+                color: #66c2ff;
+            }
+
+        button {
+            background-color: #444;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #555;
+            }
+
+        .back-to-list {
+            margin-bottom: 70px; /* Adjust this value as needed */
+        }
+    </style>
+</head>
+
+<h1>Create a Pixel Art</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form id="artForm" asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="pixels" class="control-label">Pixel Art</label>
+                <div id="brushColor" style="width: 50px; height: 50px; border: 1px solid #000; background-color: #ffffff; margin-bottom: 10px;"></div>
+                <input type="color" id="colorPicker" value="#ffffff" style="margin-bottom: 10px;" onchange="pickColor(this.value)">
+                <button type="button" onclick="clearGrid()" style="margin-bottom: 10px;">Clear</button>
+                <div class="color-palette" style="margin-bottom: 10px;">
+                    <div class="recent-colors" id="recentColors" style="display: flex; gap: 5px;">
+                        <!-- Recently used colors will be added here dynamically -->
+                    </div>
+                </div>
+                <div class="grid" id="grid" style="display: grid; grid-template-columns: repeat(5, 50px); grid-template-rows: repeat(5, 50px);">
+                    @for (int i = 0; i < 25; i++)
+                    {
+                        <div class="box" onclick="paintBox(this)"></div>
+                    }
+                </div>
+                <input type="hidden" id="Pixels" name="Pixels" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn-primary" />
+            </div>
+        </form>
+    </div>
+    <br />
+</div>
+
+<div>
+    <a asp-action="Index" class= "btn-primary back-to-list">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        let currentColor = '#ffffff'; // Default color
+        let recentColors = [];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeGrid();
+        });
+
+        function pickColor(color) {
+            currentColor = color;
+            document.getElementById('brushColor').style.backgroundColor = color;
+            updateRecentColors(color);
+        }
+
+        function paintBox(box) {
+            box.style.backgroundColor = currentColor;
+        }
+
+        function clearGrid() {
+            const boxes = document.querySelectorAll('.box');
+            boxes.forEach(box => {
+                box.style.backgroundColor = '#ffffff';
+            });
+        }
+
+        function initializeGrid() {
+            const boxes = document.querySelectorAll('.box');
+            boxes.forEach(box => {
+                box.style.backgroundColor = '#ffffff'; // Set all boxes to white
+            });
+        }
+
+        function saveColors() {
+            const boxes = document.querySelectorAll('.box');
+            let colorData = [];
+            boxes.forEach(box => {
+                const color = box.style.backgroundColor || '#ffffff';
+                const hexColor = rgbToHex(color);
+                colorData.push(hexColor);
+            });
+
+            // Save the colorData as a string
+            const colorString = JSON.stringify(colorData);
+            document.getElementById('Pixels').value = colorString;
+        }
+
+        function rgbToHex(rgb) {
+            let rgbArray = rgb.match(/\d+/g);
+            if (rgbArray) {
+                let r = parseInt(rgbArray[0]);
+                let g = parseInt(rgbArray[1]);
+                let b = parseInt(rgbArray[2]);
+                return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+            }
+            return rgb; // Fallback if RGB parsing fails
+        }
+
+        function updateRecentColors(color) {
+            // Add the new color to the recentColors array if it's not already there
+            if (!recentColors.includes(color)) {
+                recentColors.unshift(color);
+                if (recentColors.length > 3) {
+                    recentColors.pop();
+                }
+            }
+            renderRecentColors();
+        }
+
+        function renderRecentColors() {
+            const recentColorsDiv = document.getElementById('recentColors');
+            recentColorsDiv.innerHTML = '';
+            recentColors.forEach(color => {
+                const colorDiv = document.createElement('div');
+                colorDiv.style.backgroundColor = color;
+                colorDiv.style.width = '30px';
+                colorDiv.style.height = '30px';
+                colorDiv.style.border = '1px solid #000';
+                colorDiv.style.cursor = 'pointer';
+                colorDiv.onclick = () => pickColor(color);
+                recentColorsDiv.appendChild(colorDiv);
+            });
+        }
+
+        // Ensure colors are saved before form submission
+        document.getElementById('artForm').addEventListener('submit', saveColors);
+    </script>
+}

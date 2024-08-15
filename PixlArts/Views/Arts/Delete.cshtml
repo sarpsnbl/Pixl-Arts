@@ -1,0 +1,70 @@
+﻿@using Newtonsoft.Json
+@model PixlArts.Models.Art
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Art</h4>
+    <hr />
+    <dl class="row">
+        <td>
+            @Html.DisplayFor(modelItem => Model.Description)
+        </td>
+        <td>
+            <div class="grid" style="display: grid; grid-template-columns: repeat(5, 50px);">
+                @{
+                    // Ensure Pixels is parsed correctly
+                    var item = Model;
+                    var pixelData = item.Pixels;
+                    var pixels = new List<string>();
+
+                    // Parse pixelData if it's a JSON string
+                    if (pixelData != null && pixelData.Length > 0)
+                    {
+                        // Check if it's a JSON string
+                        try
+                        {
+                            // This handles cases where pixelData might be a JSON-encoded string
+                            pixels = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(pixelData[0]);
+                        }
+                        catch
+                        {
+                            // Handle parsing error, if any
+                            <p>Error: Unable to parse pixel data.</p>
+                        }
+                    }
+
+                        // Print the pixels to the console for debugging
+                    <script>
+                        console.log("Pixel Data for Art ID @item.Id:", @Html.Raw(JsonConvert.SerializeObject(pixels)));
+                    </script>
+
+                    // Render the grid with pixel data
+                    if (pixels != null && pixels.Count == 25)
+                    {
+                        for (int i = 0; i < pixels.Count; i++)
+                        {
+                            var color = pixels[i];
+                            <div class="box" style="width: 50px; height: 50px; background-color: @color;"></div>
+                        }
+                    }
+                    else
+                    {
+                        <p>Error: Pixel data is invalid or empty.</p>
+                    }
+                }
+            </div>
+        </td>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<head>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+            .grid-container > div {
+                background-color: #096DFB;
+                border: 1px solid #000000;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 3px;
+                transition: background-color 0.3s, transform 0.3s; /* Smooth transition for hover effect */
+            }
+
+                .grid-container > div:hover {
+                    background-color: #0e5bb5; /* Darker blue */
+                    transform: scale(1.05); /* Slightly enlarge the element */
+                }
+
+            .grid-container > p {
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 3px;
+            }
+    </style>
+</head>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>
+        Welcome to the pixel art sharing app. You can choose one of the following options:
+    </p>
+    <div class="grid-container">
+        <div class="button">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Arts" asp-action="Create">
+                Create New Pixel Art
+            </a>
+        </div>
+        <div class="button">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Arts" asp-action="Index">
+                View Recent Pixel Art
+            </a>
+        </div>
+        <div class="button">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Arts" asp-action="ShowSearchForm">
+                Search for Pixel Art
+            </a>
+        </div>
+    </div>
+    <div class="grid-container">
+        <p>
+
+            Start from scratch to design and share your own unique pixel art masterpiece with others.
+        </p>
+        <p>
+            Explore the latest pixel art creations from the community and see what's trending.
+        </p>
+        <p>
+            Find specific pixel art pieces by searching through keywords or categories.
+        </p>
+    </div>
+</div>

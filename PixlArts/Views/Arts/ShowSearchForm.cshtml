@@ -1,0 +1,46 @@
+﻿<head>
+    <style>
+        .btn-custom {
+            background-color: #333333; /* Dark background color */
+            color: #00aaff; /* Bright text color */
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px; /* Rounded corners */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+            .btn-custom:hover {
+                background-color: #555555; /* Slightly lighter color on hover */
+                color: #ffffff; /* Change text color on hover */
+            }
+    </style>
+</head>
+
+<body style="background-color: #3A3A3A;">
+<h4 style="color: white">Search</h4>
+<hr />
+    <div class="row" style="background-color: #3A3A3A; padding: 15px;">
+    <div class="col-md-4">
+        <form asp-action="ShowSearchResults">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label for="SearchPhrase" class="control-label"></label>
+                <input name="SearchPhrase" class="form-control" />
+            </div>
+                <div class="form-group">
+                    <input type="submit" value="Search" class="btn btn-custom mb-4 mb-md-5 mb-lg-6" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+</body>
